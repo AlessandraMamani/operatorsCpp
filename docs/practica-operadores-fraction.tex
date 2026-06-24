@@ -1,0 +1,355 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\lstdefinestyle{cstyle}{
+  language=C++,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries\color{blue!60!black},
+  commentstyle=\itshape\color{green!40!black},
+  stringstyle=\color{red!50!black},
+  numbers=left,
+  numberstyle=\tiny,
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  tabsize=2,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible
+}
+
+\lstset{style=cstyle}
+
+\title{Práctica de laboratorio: Sobrecarga de operadores en C++}
+\author{Programación II}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Presentación}
+
+En esta práctica implementará una clase \lstinline|Fraction| para representar fracciones racionales. El objetivo es estudiar la sobrecarga de operadores en C++ y distinguir cuándo conviene implementar un operador como \textbf{función miembro} y cuándo conviene implementarlo como \textbf{función no miembro}.
+
+La práctica también reforzará el uso correcto de constructores, encapsulación, métodos \lstinline|const|, manejo básico de errores de entrada y mantenimiento de invariantes dentro de una clase.
+
+\section{Objetivos}
+
+Al finalizar la práctica, el estudiante será capaz de:
+
+\begin{enumerate}
+  \item Implementar una clase en C++ con atributos privados y constructores correctos.
+  \item Mantener invariantes internos de una clase.
+  \item Sobrecargar operadores aritméticos y de comparación.
+  \item Distinguir entre operadores implementados como funciones miembro y operadores implementados como funciones no miembro.
+  \item Implementar correctamente los operadores de entrada y salida \lstinline|operator>>| y \lstinline|operator<<|.
+  \item Usar pruebas simples para verificar el comportamiento de una clase.
+\end{enumerate}
+
+\section{Contexto del problema}
+
+Se desea implementar una clase \lstinline|Fraction| que permita trabajar con fracciones racionales de la forma \lstinline|numerador/denominador|.
+
+Por ejemplo:
+
+\begin{lstlisting}
+Fraction a(1, 2);
+Fraction b(1, 3);
+
+Fraction c = a + b;
+
+std::cout << c << '\n';
+\end{lstlisting}
+
+La salida esperada sería:
+
+\begin{lstlisting}[language={}]
+5/6
+\end{lstlisting}
+
+La clase debe garantizar que toda fracción se mantenga siempre en un estado válido. En particular, el denominador nunca debe ser cero.
+
+\section{Archivos del proyecto}
+
+El código base del laboratorio estará organizado de la siguiente forma:
+
+\begin{lstlisting}[language={}]
+.
+|-- Makefile
+|-- README.md
+|-- include
+|   `-- Fraction.h
+|-- src
+|   `-- Fraction.cc
+`-- tests
+    `-- main.cc
+\end{lstlisting}
+
+El archivo \lstinline|Fraction.h| contendrá la declaración de la clase y de las funciones asociadas. El archivo \lstinline|Fraction.cc| contendrá la implementación. El archivo \lstinline|tests/main.cc| contendrá pruebas simples para verificar el funcionamiento del código.
+
+\section{Requisitos de implementación}
+
+\subsection{Clase \texttt{Fraction}}
+
+Debe implementar una clase \lstinline|Fraction| con dos atributos privados:
+
+\begin{lstlisting}
+int numerator;
+int denominator;
+\end{lstlisting}
+
+La clase debe ofrecer, como mínimo, los siguientes constructores y métodos:
+
+\begin{lstlisting}
+class Fraction {
+private:
+  int numerator;
+  int denominator;
+
+public:
+  Fraction(int numerator, int denominator);
+  explicit Fraction(int numerator);
+
+  int num() const;
+  int den() const;
+};
+\end{lstlisting}
+
+El constructor \lstinline|Fraction(int numerator, int denominator)| debe rechazar denominadores iguales a cero.
+
+El constructor \lstinline|explicit Fraction(int numerator)| debe construir una fracción entera, equivalente a \lstinline|numerator/1|.
+
+Los métodos \lstinline|num()| y \lstinline|den()| deben ser métodos \lstinline|const|.
+
+\section{Invariante de la clase}
+
+La clase \lstinline|Fraction| debe mantener el siguiente invariante:
+
+\begin{center}
+\lstinline|denominator != 0|
+\end{center}
+
+Opcionalmente, puede mantener también las fracciones normalizadas. Por ejemplo:
+
+\begin{lstlisting}[language={}]
+2/4  ->  1/2
+-2/4 -> -1/2
+2/-4 -> -1/2
+\end{lstlisting}
+
+Si decide implementar normalización, asegúrese de que el signo negativo quede en el numerador y que el denominador sea siempre positivo.
+
+\section{Sobrecarga de operadores como funciones miembro}
+
+Algunos operadores modifican directamente el objeto ubicado a la izquierda del operador. En estos casos, es natural implementarlos como \textbf{funciones miembro}.
+
+Debe implementar los siguientes operadores como funciones miembro:
+
+\begin{lstlisting}
+Fraction& operator+=(const Fraction& other);
+Fraction& operator-=(const Fraction& other);
+\end{lstlisting}
+
+Por ejemplo:
+
+\begin{lstlisting}
+Fraction a(1, 2);
+Fraction b(1, 3);
+
+a += b;
+\end{lstlisting}
+
+Después de ejecutar el código anterior, \lstinline|a| debe representar \lstinline|5/6|.
+
+La expresión \lstinline|a += b| se interpreta conceptualmente como \lstinline|a.operator+=(b)|. Por esta razón, \lstinline|operator+=| se implementa naturalmente como función miembro: el objeto izquierdo es el que se modifica.
+
+Ambos operadores deben retornar \lstinline|*this| para permitir expresiones encadenadas.
+
+\section{Sobrecarga de operadores como funciones no miembro}
+
+Otros operadores no modifican ninguno de sus operandos. En estos casos, normalmente conviene implementarlos como \textbf{funciones no miembro}.
+
+Debe implementar los siguientes operadores como funciones no miembro:
+
+\begin{lstlisting}
+Fraction operator+(Fraction a, const Fraction& b);
+Fraction operator-(Fraction a, const Fraction& b);
+Fraction operator*(const Fraction& a, const Fraction& b);
+Fraction operator/(const Fraction& a, const Fraction& b);
+\end{lstlisting}
+
+La implementación de \lstinline|operator+| puede reutilizar \lstinline|operator+=|:
+
+\begin{lstlisting}
+Fraction operator+(Fraction a, const Fraction& b){
+  a += b;
+  return a;
+}
+\end{lstlisting}
+
+De manera similar, \lstinline|operator-| puede reutilizar \lstinline|operator-=|.
+
+\section{Operadores de comparación}
+
+Debe implementar, como mínimo, los siguientes operadores de comparación como funciones no miembro:
+
+\begin{lstlisting}
+bool operator==(const Fraction& a, const Fraction& b);
+bool operator!=(const Fraction& a, const Fraction& b);
+bool operator<(const Fraction& a, const Fraction& b);
+bool operator<=(const Fraction& a, const Fraction& b);
+bool operator>(const Fraction& a, const Fraction& b);
+bool operator>=(const Fraction& a, const Fraction& b);
+\end{lstlisting}
+
+Sugerencia: no es necesario implementar todos desde cero. Puede definir algunos operadores a partir de \lstinline|operator<| y \lstinline|operator==|.
+
+Para comparar fracciones sin usar números reales, puede comparar mediante productos cruzados: \lstinline|a/b < c/d| si y solo si \lstinline|a*d < c*b|.
+
+\section{Operador de salida \texorpdfstring{\texttt{operator\textless\textless}}{operator<<}}
+
+Debe implementar el operador de salida como función no miembro:
+
+\begin{lstlisting}
+std::ostream& operator<<(std::ostream& os, const Fraction& f);
+\end{lstlisting}
+
+Este operador debe permitir escribir:
+
+\begin{lstlisting}
+Fraction f(3, 4);
+
+std::cout << f << '\n';
+\end{lstlisting}
+
+La salida debe ser \lstinline|3/4|.
+
+El operador debe retornar el flujo recibido para permitir encadenar salidas:
+
+\begin{lstlisting}
+std::cout << "f = " << f << '\n';
+\end{lstlisting}
+
+\lstinline|operator<<| se implementa como función no miembro porque el operando izquierdo es un objeto de tipo \lstinline|std::ostream|, por ejemplo \lstinline|std::cout|.
+
+\section{Operador de entrada \texorpdfstring{\texttt{operator\textgreater\textgreater}}{operator>>}}
+
+Debe implementar el operador de entrada como función no miembro:
+
+\begin{lstlisting}
+std::istream& operator>>(std::istream& is, Fraction& f);
+\end{lstlisting}
+
+Este operador debe leer fracciones con el formato \lstinline|numerador/denominador|.
+
+Ejemplos de entrada válida:
+
+\begin{lstlisting}[language={}]
+3/4
+-2/5
+10/1
+\end{lstlisting}
+
+Si la entrada es válida, \lstinline|f| debe actualizarse con la fracción leída. Si la entrada es inválida, el operador debe marcar el flujo en estado de error usando \lstinline|is.setstate(std::ios::failbit)|.
+
+Casos inválidos:
+
+\begin{lstlisting}[language={}]
+3/0
+3-4
+abc
+\end{lstlisting}
+
+El operador no debe dejar al objeto \lstinline|f| en un estado inválido. Sugerencia: primero lea los datos en variables locales. Solo construya y asigne una nueva fracción si la entrada es válida.
+
+\section{Preguntas conceptuales}
+
+Responda brevemente en el archivo \lstinline|README.md| del repositorio:
+
+\begin{enumerate}
+  \item ¿Por qué \lstinline|operator+=| se implementa naturalmente como función miembro?
+  \item ¿Por qué \lstinline|operator+| puede implementarse como función no miembro?
+  \item ¿Por qué \lstinline|operator<<| debe implementarse como función no miembro?
+  \item ¿Qué significa que un método sea \lstinline|const|?
+  \item ¿Qué invariante debe mantener la clase \lstinline|Fraction|?
+  \item ¿Qué debe ocurrir si se intenta construir una fracción con denominador cero?
+  \item ¿Por qué \lstinline|operator>>| no debe modificar el objeto si la entrada es inválida?
+\end{enumerate}
+
+\section{Pruebas mínimas}
+
+Debe incluir pruebas que verifiquen, al menos, construcción, suma, resta, multiplicación, división, comparación, salida, entrada válida y entrada inválida.
+
+\section{Restricciones}
+
+\begin{enumerate}
+  \item Los atributos de \lstinline|Fraction| deben ser privados.
+  \item No debe usar variables globales.
+  \item No debe representar la fracción usando \lstinline|double| o \lstinline|float|.
+  \item No debe implementar operadores aritméticos modificando ambos operandos.
+  \item Los operadores \lstinline|<<| y \lstinline|>>| deben retornar referencias al flujo recibido.
+  \item Los métodos que no modifican el objeto deben declararse como \lstinline|const|.
+  \item La clase debe impedir denominadores iguales a cero.
+  \item El código debe compilar sin warnings importantes usando las opciones indicadas en el \lstinline|Makefile|.
+\end{enumerate}
+
+\section{Comandos esperados}
+
+El repositorio debe permitir compilar con:
+
+\begin{lstlisting}[language=bash]
+make
+\end{lstlisting}
+
+Ejecutar las pruebas con:
+
+\begin{lstlisting}[language=bash]
+make run
+\end{lstlisting}
+
+Limpiar archivos generados con:
+
+\begin{lstlisting}[language=bash]
+make clean
+\end{lstlisting}
+
+\section{Entregable}
+
+Debe entregar un repositorio con la estructura indicada en esta práctica. El archivo \lstinline|README.md| debe incluir las respuestas a las preguntas conceptuales.
+
+\section{Criterios de evaluación}
+
+Se evaluará:
+
+\begin{enumerate}
+  \item Correcta implementación de la clase \lstinline|Fraction|.
+  \item Uso adecuado de constructores.
+  \item Mantenimiento del invariante \lstinline|denominator != 0|.
+  \item Uso correcto de funciones miembro y funciones no miembro para la sobrecarga de operadores.
+  \item Correcta implementación de \lstinline|operator<<| y \lstinline|operator>>|.
+  \item Uso adecuado de \lstinline|const|.
+  \item Claridad y orden del código.
+  \item Correcta compilación mediante \lstinline|make|.
+  \item Pruebas suficientes en \lstinline|tests/main.cc|.
+  \item Respuestas claras en el \lstinline|README.md|.
+\end{enumerate}
+
+\section{Reflexión final}
+
+La sobrecarga de operadores debe usarse para que el código sea más natural y expresivo, no para ocultar comportamientos inesperados.
+
+Una clase bien diseñada debe proteger sus invariantes y ofrecer operaciones coherentes con el significado del tipo que representa.
+
+\end{document}

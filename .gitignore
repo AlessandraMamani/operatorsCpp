@@ -1,0 +1,9 @@
+build/
+fraction_tests
+*.o
+*.d
+*.out
+*.log
+*.aux
+*.toc
+*.synctex.gz
