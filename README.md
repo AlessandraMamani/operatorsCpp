@@ -55,7 +55,9 @@ Responda estas preguntas en este mismo archivo, debajo de cada enunciado.
 
 ### 1. ¿Por qué `operator+=` se implementa naturalmente como función miembro?
 
-Respuesta:
+Respuesta: 
+Porque 
+
 
 ### 2. ¿Por qué `operator+` puede implementarse como función no miembro?
 
@@ -80,3 +82,4 @@ Respuesta:
 ### 7. ¿Por qué `operator>>` no debe modificar el objeto si la entrada es inválida?
 
 Respuesta:
+# operatorsCpp
