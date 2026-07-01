@@ -118,7 +118,7 @@ bool operator<(const Fraction& a, const Fraction& b){
   /*(void)a;
   (void)b;
   return false;*/
-	return static_cast<long long>(a.num()) * b.den() < static_cast<long long>(b.num()) * a.den();
+	return (long long)(a.num()) * b.den() < (long long)(b.num()) * a.den();
 }
 
 bool operator<=(const Fraction& a, const Fraction& b){
