@@ -89,6 +89,19 @@ void testInvalidInput(){
   assert(f == Fraction(1, 2));
 }
 
+void testInvalidInputFormat(){
+	Fraction f(1, 2);
+
+	std::istringstream bad1("3-4");
+	bad1 >> f;
+	assert(!bad1);
+	assert(f == Fraction(1,2));
+
+	std::istringstream bad2("abc");
+	bad2 >> f;
+
+}
+
 int main(){
   testConstruction();
   testZeroDenominator();
@@ -98,7 +111,7 @@ int main(){
   testOutput();
   testInput();
   testInvalidInput();
-
+  testInvalidInputFormat();
   std::cout << "All tests passed\n";
 
   return 0;
